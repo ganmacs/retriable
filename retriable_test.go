@@ -31,7 +31,12 @@ func TestFailRetry(t *testing.T) {
 	}
 
 	err := Retry(fn)
-	if err != nil && (err.Error() != "error") {
+
+	if err == nil {
+		t.Errorf("should have error")
+	}
+
+	if err.Error() != "error" {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 
