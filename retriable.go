@@ -19,6 +19,7 @@ type Options struct {
 	retries        int
 	maxElapsedTime time.Duration
 	timeout        time.Duration
+	backoff        backoff.BackOff
 }
 
 type clock struct {
@@ -40,9 +41,10 @@ func Retry(op Operation) error {
 		retries:        defaultRetries,
 		maxElapsedTime: defaultMaxElapsedTime,
 		timeout:        defaultTimeout,
+		backoff:        backoff.NewExponentialBackOff(),
 	}
 
-	return doRetry(backoff.NewExponentialBackOff(), op, opt)
+	return doRetry(op, opt)
 }
 
 func RetryWithOptions(op Operation, opt *Options) error {
@@ -50,9 +52,14 @@ func RetryWithOptions(op Operation, opt *Options) error {
 		if opt.retries == 0 {
 			opt.retries = defaultRetries
 		}
+
+		if opt.backoff == nil {
+			opt.backoff = backoff.NewExponentialBackOff()
+		}
+
 	}
 
-	return doRetry(backoff.NewExponentialBackOff(), op, opt)
+	return doRetry(op, opt)
 }
 
 func timeout(t time.Duration, op Operation) error {
@@ -70,17 +77,19 @@ func timeout(t time.Duration, op Operation) error {
 	}
 }
 
-func doRetry(bo backoff.BackOff, op Operation, opt *Options) error {
+func doRetry(op Operation, opt *Options) error {
 	retry := func() error {
-		var retries = opt.retries
-		var next time.Duration
-		var err error
-		var clock = newClock()
+		var (
+			next time.Duration
+			err  error
+		)
 
+		retries := opt.retries
 		if retries < 1 {
 			return errors.New("retires should be 1 or more")
 		}
 
+		clock := newClock()
 		for i := 0; i < retries; i++ {
 			if err = op(); err == nil {
 				return nil
@@ -90,11 +99,7 @@ func doRetry(bo backoff.BackOff, op Operation, opt *Options) error {
 				return errors.New("Runngin too long")
 			}
 
-			// TODO fix -1
-			if next = bo.Next(); next == -1 {
-				return err
-			}
-
+			next = opt.backoff.Next()
 			time.Sleep(next)
 		}
 		return err
