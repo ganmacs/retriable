@@ -60,7 +60,7 @@ func TestMaxElapsedTimeRetry(t *testing.T) {
 		t.Errorf("should have error")
 	}
 
-	if err.Error() != "Timeout" {
+	if err.Error() != "Runngin too long" {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 }

@@ -65,7 +65,7 @@ func doRetry(bo backoff.BackOff, opt *Options) error {
 		}
 
 		if opt.maxElapsedTime < clock.getElapsedTime() {
-			return errors.New("Timeout")
+			return errors.New("Runngin too long")
 		}
 
 		// TODO fix -1
