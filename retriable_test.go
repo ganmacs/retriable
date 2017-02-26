@@ -47,13 +47,12 @@ func TestFailRetry(t *testing.T) {
 
 func TestMaxElapsedTimeRetry(t *testing.T) {
 	fn := func() error {
-		time.Sleep(2)
+		time.Sleep(60 * time.Millisecond)
 		return errors.New("error")
 	}
 
 	err := RetryWithOptions(fn, &Options{
-		retries:        3,
-		maxElapsedTime: 500 * time.Millisecond,
+		maxElapsedTime: 50 * time.Millisecond,
 	})
 
 	if err == nil {
