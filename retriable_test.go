@@ -64,3 +64,22 @@ func TestMaxElapsedTimeRetry(t *testing.T) {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 }
+
+func TestTimeoutRetry(t *testing.T) {
+	fn := func() error {
+		time.Sleep(1 * time.Second)
+		return nil
+	}
+
+	err := RetryWithOptions(fn, &Options{
+		timeout: 300 * time.Millisecond,
+	})
+
+	if err == nil {
+		t.Errorf("should have error")
+	}
+
+	if err.Error() != "Timeout" {
+		t.Errorf("unexpected error: %s", err.Error())
+	}
+}
