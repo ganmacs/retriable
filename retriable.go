@@ -2,8 +2,9 @@ package retriable
 
 import (
 	"errors"
-	"github.com/ganmacs/retriable/backoff"
 	"time"
+
+	"github.com/ganmacs/retriable/backoff"
 )
 
 const (
