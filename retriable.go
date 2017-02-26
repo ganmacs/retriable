@@ -16,7 +16,6 @@ const (
 type Operation func() error
 
 type Options struct {
-	operation      Operation
 	retries        int
 	maxElapsedTime time.Duration
 	timeout        time.Duration
@@ -38,25 +37,22 @@ func (c *clock) getElapsedTime() time.Duration {
 
 func Retry(op Operation) error {
 	opt := &Options{
-		operation:      op,
 		retries:        defaultRetries,
 		maxElapsedTime: defaultMaxElapsedTime,
 		timeout:        defaultTimeout,
 	}
 
-	return doRetry(backoff.NewExponentialBackOff(), opt)
+	return doRetry(backoff.NewExponentialBackOff(), op, opt)
 }
 
 func RetryWithOptions(op Operation, opt *Options) error {
-	opt.operation = op
-
 	if opt != nil {
 		if opt.retries == 0 {
 			opt.retries = defaultRetries
 		}
 	}
 
-	return doRetry(backoff.NewExponentialBackOff(), opt)
+	return doRetry(backoff.NewExponentialBackOff(), op, opt)
 }
 
 func timeout(t time.Duration, op Operation) error {
@@ -74,7 +70,7 @@ func timeout(t time.Duration, op Operation) error {
 	}
 }
 
-func doRetry(bo backoff.BackOff, opt *Options) error {
+func doRetry(bo backoff.BackOff, op Operation, opt *Options) error {
 	retry := func() error {
 		var retries = opt.retries
 		var next time.Duration
@@ -86,7 +82,7 @@ func doRetry(bo backoff.BackOff, opt *Options) error {
 		}
 
 		for i := 0; i < retries; i++ {
-			if err = opt.operation(); err == nil {
+			if err = op(); err == nil {
 				return nil
 			}
 
