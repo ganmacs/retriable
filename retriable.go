@@ -35,8 +35,6 @@ func doRetry(opt *Options) error {
 	var next time.Duration
 	var err error
 
-	bo.Reset()
-
 	for i := 0; i < retries; i++ {
 		if err = opt.operation(); err == nil {
 			return nil

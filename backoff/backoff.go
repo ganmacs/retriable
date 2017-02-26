@@ -6,6 +6,4 @@ import (
 
 type BackOff interface {
 	Next() time.Duration
-
-	Reset()
 }
