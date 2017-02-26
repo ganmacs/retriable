@@ -13,7 +13,6 @@ type Operation func() error
 
 type Options struct {
 	operation Operation
-	backoff   backoff.BackOff
 	retries   int
 }
 
@@ -21,14 +20,12 @@ func Retry(op Operation) error {
 	opt := &Options{
 		operation: op,
 		retries:   defaultRetries,
-		backoff:   backoff.NewExponentialBackOff(),
 	}
 
-	return doRetry(opt)
+	return doRetry(backoff.NewExponentialBackOff(), opt)
 }
 
-func doRetry(opt *Options) error {
-	var bo = opt.backoff
+func doRetry(bo backoff.BackOff, opt *Options) error {
 	var retries = opt.retries
 
 	var next time.Duration
