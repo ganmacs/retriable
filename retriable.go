@@ -6,8 +6,7 @@ import (
 )
 
 const (
-	defaultInterval = 0
-	defaultRetries  = 3
+	defaultRetries = 3
 )
 
 type Operation func() error
@@ -22,7 +21,7 @@ func Retry(op Operation) error {
 	opt := &Options{
 		operation: op,
 		retries:   defaultRetries,
-		backoff:   backoff.NewConstantBackOff(defaultInterval),
+		backoff:   backoff.NewExponentialBackOff(),
 	}
 
 	return doRetry(opt)
