@@ -11,10 +11,10 @@ RandomizedInterval = CurrentInterval * (random value in range [1 - Randomization
 */
 
 const (
-	defaultInterval            = 500 * time.Millisecond
-	defaultMaxInterval         = 60 * time.Second
-	defaultRandomizationFactor = 0.25
-	defaultMultiplier          = 1.5
+	DefaultInterval            = 500 * time.Millisecond
+	DefaultMaxInterval         = 60 * time.Second
+	DefaultRandomizationFactor = 0.25
+	DefaultMultiplier          = 1.5
 )
 
 type ExponentialBackOff struct {
@@ -26,10 +26,10 @@ type ExponentialBackOff struct {
 
 func NewExponentialBackOff() *ExponentialBackOff {
 	return &ExponentialBackOff{
-		CurrentInterval:     defaultInterval,
-		MaxInterval:         defaultMaxInterval,
-		RandomizationFactor: defaultRandomizationFactor,
-		Multiplier:          defaultMultiplier,
+		CurrentInterval:     DefaultInterval,
+		MaxInterval:         DefaultMaxInterval,
+		RandomizationFactor: DefaultRandomizationFactor,
+		Multiplier:          DefaultMultiplier,
 	}
 }
 
