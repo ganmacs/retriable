@@ -84,7 +84,7 @@ func TestMaxElapsedTimeRetry(t *testing.T) {
 		t.Errorf("should have error")
 	}
 
-	if err.Error() != "Runngin too long" {
+	if err.Error() != "Exceeds ElapsedTime" {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 }

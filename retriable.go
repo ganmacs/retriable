@@ -14,6 +14,11 @@ const (
 	defaultTimeout        = 0
 )
 
+var (
+	ErrRetryieableTimeout        = errors.New("Timeout")
+	ErrRetryieableMaxElapsedTime = errors.New("Exceeds ElapsedTime")
+)
+
 type Operation func() error
 
 type Options struct {
@@ -82,7 +87,7 @@ func timeout(t time.Duration, op func(context.Context) error) error {
 	case err := <-c:
 		return err
 	case <-time.After(t):
-		return errors.New("Timeout")
+		return ErrRetryieableTimeout
 	}
 }
 
@@ -97,14 +102,14 @@ func doRetry(op Operation, opt *Options) error {
 		for i := 0; i < opt.retries; i++ {
 			select {
 			case <-ctx.Done():
-				return errors.New("Timeout")
+				return ErrRetryieableTimeout
 			default:
 				if err = op(); err == nil {
 					return nil
 				}
 
 				if opt.maxElapsedTime < clock.getElapsedTime() {
-					return errors.New("Runngin too long")
+					return ErrRetryieableMaxElapsedTime
 				}
 
 				next = opt.backoff.Next()
