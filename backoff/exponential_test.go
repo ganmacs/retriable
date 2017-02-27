@@ -7,7 +7,7 @@ import (
 
 func TestExopnetialNext(t *testing.T) {
 	var delta = 0.0
-	var defaultIntervalFloat = float64(defaultInterval)
+	var defaultIntervalFloat = float64(DefaultInterval)
 
 	// 1.5 is default Multiplier
 	var intervals = []float64{
@@ -22,14 +22,14 @@ func TestExopnetialNext(t *testing.T) {
 
 	backoff := NewExponentialBackOff()
 	for _, interval := range intervals {
-		delta = interval * defaultRandomizationFactor
+		delta = interval * DefaultRandomizationFactor
 		assertBetween(t, float64(backoff.Next()), interval-delta, interval+delta)
 	}
 }
 
 func TestMaxInterval(t *testing.T) {
 	var delta = 0.0
-	var defaultIntervalFloat = float64(defaultInterval)
+	var defaultIntervalFloat = float64(DefaultInterval)
 
 	backoff := NewExponentialBackOff()
 	backoff.MaxInterval = 1 * time.Second
@@ -42,7 +42,7 @@ func TestMaxInterval(t *testing.T) {
 	}
 
 	for _, interval := range intervals {
-		delta = interval * defaultRandomizationFactor
+		delta = interval * DefaultRandomizationFactor
 		assertBetween(t, float64(backoff.Next()), interval-delta, interval+delta)
 	}
 

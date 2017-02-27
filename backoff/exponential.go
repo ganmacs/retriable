@@ -33,7 +33,7 @@ func NewExponentialBackOff() *ExponentialBackOff {
 	}
 }
 
-func NewExponentialBackOff(initialInterval time.Duration) *ExponentialBackOff {
+func NewExponentialBackOffWithInterval(initialInterval time.Duration) *ExponentialBackOff {
 	return &ExponentialBackOff{
 		CurrentInterval:     initialInterval,
 		MaxInterval:         DefaultMaxInterval,
