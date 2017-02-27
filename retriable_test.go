@@ -107,3 +107,34 @@ func TestTimeoutRetry(t *testing.T) {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 }
+
+func TestTimeoutRetry2(t *testing.T) {
+	i := 0
+	fn := func() error {
+		i++
+		time.Sleep(200 * time.Millisecond)
+		return errors.New("error")
+	}
+
+	err := RetryWithOptions(fn, &Options{
+		interval: 1 * time.Millisecond,
+		timeout:  100 * time.Millisecond,
+	})
+
+	// wait next retry if exist
+	time.Sleep(200 * time.Millisecond)
+
+	if err == nil {
+		t.Errorf("should have error")
+	}
+
+	if err.Error() != "Timeout" {
+		t.Errorf("unexpected error: %s", err.Error())
+	}
+
+	// goroutine should be killed
+	if i != 1 {
+		t.Errorf("should be 1 but, %v", i)
+	}
+
+}

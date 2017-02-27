@@ -1,6 +1,7 @@
 package retriable
 
 import (
+	"context"
 	"errors"
 	"time"
 
@@ -63,17 +64,18 @@ func RetryWithOptions(op Operation, opt *Options) error {
 		} else if opt.backoff == nil {
 			opt.backoff = backoff.NewExponentialBackOff()
 		}
-
 	}
 
 	return doRetry(op, opt)
 }
 
-func timeout(t time.Duration, op Operation) error {
+func timeout(t time.Duration, op func(context.Context) error) error {
 	c := make(chan error)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	go func() {
-		c <- op()
+		c <- op(ctx)
 	}()
 
 	select {
@@ -85,7 +87,7 @@ func timeout(t time.Duration, op Operation) error {
 }
 
 func doRetry(op Operation, opt *Options) error {
-	retry := func() error {
+	retry := func(ctx context.Context) error {
 		var (
 			next time.Duration
 			err  error
@@ -93,16 +95,21 @@ func doRetry(op Operation, opt *Options) error {
 
 		clock := newClock()
 		for i := 0; i < opt.retries; i++ {
-			if err = op(); err == nil {
-				return nil
-			}
+			select {
+			case <-ctx.Done():
+				return errors.New("Timeout")
+			default:
+				if err = op(); err == nil {
+					return nil
+				}
 
-			if opt.maxElapsedTime < clock.getElapsedTime() {
-				return errors.New("Runngin too long")
-			}
+				if opt.maxElapsedTime < clock.getElapsedTime() {
+					return errors.New("Runngin too long")
+				}
 
-			next = opt.backoff.Next()
-			time.Sleep(next)
+				next = opt.backoff.Next()
+				time.Sleep(next)
+			}
 		}
 		return err
 	}
@@ -111,5 +118,5 @@ func doRetry(op Operation, opt *Options) error {
 		return timeout(opt.timeout, retry)
 	}
 
-	return retry()
+	return retry(context.Background())
 }
