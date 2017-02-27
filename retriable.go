@@ -19,6 +19,7 @@ type Options struct {
 	retries        int
 	maxElapsedTime time.Duration
 	timeout        time.Duration
+	interval       time.Duration
 	backoff        backoff.BackOff
 }
 
@@ -53,7 +54,13 @@ func RetryWithOptions(op Operation, opt *Options) error {
 			opt.retries = defaultRetries
 		}
 
-		if opt.backoff == nil {
+		if opt.maxElapsedTime == 0 {
+			opt.maxElapsedTime = defaultMaxElapsedTime
+		}
+
+		if opt.backoff == nil && opt.interval != 0 {
+			opt.backoff = backoff.NewExponentialBackOffWithInterval(opt.interval)
+		} else if opt.backoff == nil {
 			opt.backoff = backoff.NewExponentialBackOff()
 		}
 

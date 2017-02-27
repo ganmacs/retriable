@@ -33,6 +33,15 @@ func NewExponentialBackOff() *ExponentialBackOff {
 	}
 }
 
+func NewExponentialBackOff(initialInterval time.Duration) *ExponentialBackOff {
+	return &ExponentialBackOff{
+		CurrentInterval:     initialInterval,
+		MaxInterval:         DefaultMaxInterval,
+		RandomizationFactor: DefaultRandomizationFactor,
+		Multiplier:          DefaultMultiplier,
+	}
+}
+
 func (bo *ExponentialBackOff) getRandomizedInterval(interval float64) float64 {
 	delta := bo.RandomizationFactor * interval
 	min := interval - delta

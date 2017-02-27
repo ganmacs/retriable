@@ -45,6 +45,31 @@ func TestFailRetry(t *testing.T) {
 	}
 }
 
+func TestRetriesAndInterval(t *testing.T) {
+	var i int
+	opt := &Options{
+		retries:  4,
+		interval: 10 * time.Millisecond,
+	}
+
+	err := RetryWithOptions(func() error {
+		i++
+		return errors.New("error")
+	}, opt)
+
+	if err == nil {
+		t.Errorf("should have error")
+	}
+
+	if err.Error() != "error" {
+		t.Errorf("unexpected error: %s", err.Error())
+	}
+
+	if i != 4 {
+		t.Errorf("should be 4 but, %v", i)
+	}
+}
+
 func TestMaxElapsedTimeRetry(t *testing.T) {
 	fn := func() error {
 		time.Sleep(60 * time.Millisecond)
