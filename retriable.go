@@ -91,13 +91,8 @@ func doRetry(op Operation, opt *Options) error {
 			err  error
 		)
 
-		retries := opt.retries
-		if retries < 1 {
-			return errors.New("retires should be 1 or more")
-		}
-
 		clock := newClock()
-		for i := 0; i < retries; i++ {
+		for i := 0; i < opt.retries; i++ {
 			if err = op(); err == nil {
 				return nil
 			}
